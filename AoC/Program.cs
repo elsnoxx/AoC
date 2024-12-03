@@ -3,10 +3,12 @@ using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace AoC
 {
@@ -616,8 +618,241 @@ namespace AoC
         }
         #endregion
 
+        #region 2024 day 1
+
+        
+        static int HistorianHysteria()
+        {
+            int distance = 0;
+            List<int> left = new List<int>();
+            List<int> right = new List<int>();
+            string filePath = @"C:\Users\admin\Documents\GitHub\AoC\AoC\Data\2024\day1.txt";
+            using (FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            using (StreamReader streamReader = new StreamReader(fileStream))
+            {
+                string data = streamReader.ReadToEnd();
+                string[] lines = data.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+                foreach (var line in lines)
+                {
+                    if (!string.IsNullOrWhiteSpace(line))
+                    {
+                        string[] list = line.Split("   ");
+                        left.Add(int.Parse(list[0]));
+                        right.Add(int.Parse(list[1]));
+                    }
+                }
+                streamReader.Close();
+            }
+
+            left.Sort(); right.Sort();
+            for (int i = 0; i < left.Count; i++)
+            {
+                if (left[i] > right[i])
+                {
+                    distance += left[i] - right[i];
+                }
+                else
+                {
+                    distance += right[i] - left[i];
+                }
+                
+            }
+
+            return distance;
+        }
+
+        static int HistorianHysteria2()
+        {
+            int similarity = 0;
+            List<int> left = new List<int>();
+            List<int> right = new List<int>();
+            string filePath = @"C:\Users\admin\Documents\GitHub\AoC\AoC\Data\2024\day1.txt";
+            using (FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            using (StreamReader streamReader = new StreamReader(fileStream))
+            {
+                string data = streamReader.ReadToEnd();
+                string[] lines = data.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+                foreach (var line in lines)
+                {
+                    if (!string.IsNullOrWhiteSpace(line))
+                    {
+                        string[] list = line.Split("   ");
+                        left.Add(int.Parse(list[0]));
+                        right.Add(int.Parse(list[1]));
+                    }
+                }
+                streamReader.Close();
+            }
+
+            left.Sort(); right.Sort();
+            for (int i = 0; i < left.Count; i++)
+            {
+                Console.WriteLine($"left: {left[i]}, right: {right[i]}");
+                int count = right.Where(x => x.Equals(left[i])).Count();
+                similarity += left[i] * count;
+            }
+
+            return similarity;
+        }
+        #endregion
+        #region 2024 day 2
+
+
+        static int IsSafeRow(List<int> row)
+        {
+            // Směr řazení: 1 pro vzestupné, -1 pro sestupné
+            int direction = row[0] < row[1] ? 1 : -1;
+
+            for (int i = 0; i < row.Count - 1; i++)
+            {
+                int difference = row[i + 1] - row[i];
+
+                if (difference * direction <= 0 || Math.Abs(difference) > 3 || Math.Abs(difference) < 1)
+                {
+                    return 0;
+                }
+            }
+
+            return 1;
+        }
+
+        static int IsSafeRow2(List<int> row)
+        {
+            if (IsSafeRow(row) == 1)
+                return 1;
+
+            for (int i = 0; i < row.Count; i++)
+            {
+                List<int> modifiedRow = new List<int>(row);
+                modifiedRow.RemoveAt(i);
+
+                if (IsSafeRow(modifiedRow) == 1)
+                    return 1;
+            }
+
+            return 0;
+        }
+
+
+        static int RedNosedReports()
+        {
+            int isSafe = 0;
+            List<int> row = new List<int>();
+            string filePath = @"C:\Users\admin\Documents\GitHub\AoC\AoC\Data\2024\day2.txt";
+            using (FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            using (StreamReader streamReader = new StreamReader(fileStream))
+            {
+                string data = streamReader.ReadToEnd();
+                string[] lines = data.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+                foreach (var line in lines)
+                {
+                    if (!string.IsNullOrWhiteSpace(line))
+                    {
+                        string[] list = line.Split(" ");
+                        foreach (var item in list) 
+                        {
+                            row.Add(int.Parse(item));
+                        }
+                        //isSafe += IsSafeRow(row);
+                        isSafe += IsSafeRow2(row);
+                        row.Clear();
+                    }
+                }
+                streamReader.Close();
+            }
+
+
+            return isSafe;
+        }
+        #endregion
+        #region 2024 day 3
+
+        static long MullItOver()
+        {
+            string pattern = @"mul\((\d{1,3}),(\d{1,3})\)";
+            long result = 0;
+            string filePath = @"C:\Users\admin\Documents\GitHub\AoC\AoC\Data\2024\day3.txt";
+            using (FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            using (StreamReader streamReader = new StreamReader(fileStream))
+            {
+                string data = streamReader.ReadToEnd();
+                string[] lines = data.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+                foreach (var line in lines)
+                {
+                    if (!string.IsNullOrWhiteSpace(line))
+                    {
+                        foreach (Match match in Regex.Matches(line, pattern, RegexOptions.IgnoreCase))
+                        {
+                            string[] list = match.Value.Split(new[] { ",", ")", "(" }, StringSplitOptions.None);
+                            result += long.Parse(list[1]) * long.Parse(list[2]);
+                        }
+                    }
+                }
+                streamReader.Close();
+            }
+            return result;
+        }
+
+        static long MullItOver2()
+        {
+            string patternMul = @"mul\((\d{1,3}),(\d{1,3})\)";
+            string patternDo = @"do\(\)";
+            string patternDont = @"don't\(\)";
+            long result = 0;
+            bool pritible = true;
+            string filePath = @"C:\Users\admin\Documents\GitHub\AoC\AoC\Data\2024\day3.txt";
+            using (FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            using (StreamReader streamReader = new StreamReader(fileStream))
+            {
+                string data = streamReader.ReadToEnd();
+                string[] lines = data.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+                foreach (var line in lines)
+                {
+                    if (!string.IsNullOrWhiteSpace(line))
+                    {
+                        List<Match> matchesMul = Regex.Matches(line, patternMul).ToList();
+                        List<Match> matchesDo = Regex.Matches(line, patternDo).ToList();
+                        List<Match> matchesDont = Regex.Matches(line, patternDont).ToList();
+                        var unifiedMatches = new List<(int Index, string Type)>();
+
+                        unifiedMatches.AddRange(matchesMul.Select(m => (m.Index, m.Value)));
+                        unifiedMatches.AddRange(matchesDo.Select(m => (m.Index, m.Value)));
+                        unifiedMatches.AddRange(matchesDont.Select(m => (m.Index, m.Value)));
+                        unifiedMatches = unifiedMatches.OrderBy(m => m.Index).ToList();
+
+                       
+                        foreach (var item in unifiedMatches)
+                        {
+                            if (item.Type == "don't()")
+                            {
+                                pritible = false;
+                            }
+                            else if (item.Type == "do()")
+                            {
+                                pritible = true;
+                            }
+                            else
+                            {
+                                if (pritible)
+                                {
+                                    string[] list = item.Type.Split(new[] { ",", ")", "(" }, StringSplitOptions.None);
+                                    result += long.Parse(list[1]) * long.Parse(list[2]);
+                                }
+                            }
+
+                        }
+   
+                    }
+                }
+                streamReader.Close();
+            }
+            return result;
+        }
+
+        #endregion
         static void Main(string[] args)
         {
+            #region 2015
             //Console.WriteLine($"2015 Day 1: Not Quite Lisp\nResults: {NotQuiteLisp1()} {NotQuiteLisp2()}");
             //int[] result = IWasToldThereWouldBeNoMathMain();
             //Console.WriteLine($"2015 Day 2: I Was Told There Would Be No Math\nResults: Paper = {result[0]}, Ribbon = {result[1]}");
@@ -626,8 +861,10 @@ namespace AoC
             //result = InternElves();
             //Console.WriteLine($"2015 Day 5: Doesn't He Have Intern-Elves For This?\nResults: {result[0]}, second {result[1]}");
             //Console.WriteLine($"2015 Day 6: Probably a Fire Hazard\nResults: {FireHazard()}, second {FireHazardBrightness()}");
-
-
+            #endregion
+            //Console.WriteLine($"2024 Day 1: Historian Hysteria\nResult {HistorianHysteria()} taks 2 {HistorianHysteria2()}");
+            //Console.WriteLine($"2024 Day 2: Red-Nosed Reports\nResult taks 1 {RedNosedReports()} taks 2 ");
+            //Console.WriteLine($"2024 Day 3: Mull It Over\nResults {MullItOver()} task2 {MullItOver2()}");
         }
     }
 }
