@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -850,6 +851,138 @@ namespace AoC
         }
 
         #endregion
+        #region 2024 day 4
+
+        static long searchHorizontal(List<List<char>> map, string searchingWord)
+        {
+            long result = 0;
+            for (int i = 0; i < map.Count; i++)
+            {
+                for (int j = 0; j <= map[i].Count - searchingWord.Length; j++)
+                {
+                    bool match = true;
+
+                    for (int a = 0; a < searchingWord.Length; a++)
+                    {
+                        if (map[i][j + a] != searchingWord[a])
+                        {
+                            match = false;
+                            break;
+                        }
+                    }
+
+                    if (match)
+                    {
+                        result++;
+                    }
+
+                }
+            }
+            return result;
+        }
+
+        static long searchVertical(List<List<char>> map, string searchingWord)
+        {
+            long result = 0;
+
+            for (int i = 0; i <= map.Count - searchingWord.Length; i++)
+            {
+                for (int j = 0; j < map[i].Count; j++)
+                {
+                    bool match = true;
+
+                    for (int a = 0; a < searchingWord.Length; a++)
+                    {
+                        if (i + a >= map.Count || j >= map[i + a].Count || map[i + a][j] != searchingWord[a])
+                        {
+                            match = false;
+                            break;
+                        }
+                    }
+
+                    if (match)
+                    {
+                        result++;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        static long searchDiagonal(List<List<char>> map, string searchingWord)
+        {
+            long result = 0;
+
+            for (int i = 0; i <= map.Count - searchingWord.Length; i++)
+            {
+                for (int j = 0; j < map[i].Count - searchingWord.Length; j++)
+                {
+                    bool match = true;
+
+                    for (int a = 0; a < searchingWord.Length; a++)
+                    {
+                        if (i + a >= map.Count || j >= map[i + a].Count || map[i + a][j + a] != searchingWord[a])
+                        {
+                            match = false;
+                            break;
+                        }
+                    }
+
+                    if (match)
+                    {
+                        
+                        result++;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+
+        static List<List<char>> MapReverse (List<List<char>> map)
+        {
+            var reversedMap = map.Select(row => new List<char>(row)).ToList();
+            foreach (var row in reversedMap)
+            {
+                row.Reverse();
+            }
+            return reversedMap;
+        }
+
+
+        static void CeresSearch()
+        {
+            List<List<char>> map = new List<List<char>>();
+            string filePath = @"C:\Users\admin\Documents\GitHub\AoC\AoC\Data\2024\testDay4.txt";
+            using (FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            using (StreamReader streamReader = new StreamReader(fileStream))
+            {
+                string data = streamReader.ReadToEnd();
+                string[] lines = data.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+                foreach (var line in lines)
+                {
+                    if (!string.IsNullOrWhiteSpace(line))
+                    {
+                        var row = new List<char>(line.Trim());
+                        map.Add(row);
+                    }
+                }
+                streamReader.Close();
+            }
+
+            string searchingWord = "XMAS";
+
+            
+            Console.WriteLine("horizontal {0}", searchHorizontal(map,searchingWord));
+            Console.WriteLine("vertical {0}", searchVertical(map, searchingWord));
+            Console.WriteLine("diagonal {0}", searchDiagonal(map, searchingWord));
+            Console.WriteLine("horizontal back {0}", searchHorizontal(MapReverse(map), searchingWord));
+            Console.WriteLine("vertical back {0}", searchVertical(MapReverse(map), searchingWord));
+            Console.WriteLine("diagonal back {0}", searchDiagonal(MapReverse(map), searchingWord));
+        }
+        #endregion
         static void Main(string[] args)
         {
             #region 2015
@@ -865,6 +998,8 @@ namespace AoC
             //Console.WriteLine($"2024 Day 1: Historian Hysteria\nResult {HistorianHysteria()} taks 2 {HistorianHysteria2()}");
             //Console.WriteLine($"2024 Day 2: Red-Nosed Reports\nResult taks 1 {RedNosedReports()} taks 2 ");
             //Console.WriteLine($"2024 Day 3: Mull It Over\nResults {MullItOver()} task2 {MullItOver2()}");
+            Console.WriteLine($"2024 Day 4: Ceres Search\nResults taks 1 ");
+            CeresSearch();
         }
     }
 }
